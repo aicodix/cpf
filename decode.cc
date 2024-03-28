@@ -51,7 +51,8 @@ int main(int argc, char **argv)
 		chunk_file.read(reinterpret_cast<char *>(&size), 3);
 		uint32_t crc32;
 		chunk_file.read(reinterpret_cast<char *>(&crc32), 4);
-		if (!chunk_file || magic[0] != 'C' || magic[1] != 'P' || magic[2] != 'F' || splits >= 1024 || ident <= splits || list.count(ident)) {
+		int length = (size + 2 * splits + 2) / (2 * splits + 2);
+		if (!chunk_file || magic[0] != 'C' || magic[1] != 'P' || magic[2] != 'F' || splits >= 1024 || length > MAX_LEN || ident <= splits || list.count(ident)) {
 			std::cerr << "Skipping file \"" << chunk_name << "\"." << std::endl;
 			continue;
 		}
@@ -59,7 +60,7 @@ int main(int argc, char **argv)
 			first = false;
 			block_count = splits + 1;
 			output_bytes = size + 1;
-			block_values = (output_bytes + 2 * block_count - 1) / (2 * block_count);
+			block_values = length;
 			crc32_value = crc32;
 			chunk_ident = new uint16_t[block_count];
 			chunk_subst = new uint16_t[block_count];
