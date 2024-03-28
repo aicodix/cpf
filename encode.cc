@@ -64,11 +64,11 @@ int main(int argc, char **argv)
 		crc(reinterpret_cast<uint8_t *>(input_data)[i]);
 	for (int i = input_bytes; i < 2 * total_values; ++i)
 		reinterpret_cast<uint8_t *>(input_data)[i] = 0;
-	CODE::CauchyPrimeFieldErasureCoding<PF, uint16_t, MAX_LEN> cpf;
+	auto cpf = new CODE::CauchyPrimeFieldErasureCoding<PF, uint16_t, MAX_LEN>();
 	uint16_t *chunk_data = new uint16_t[block_values];
 	for (int i = 0; i < chunk_count; ++i) {
 		int chunk_ident = block_count + i;
-		int max_sub = cpf.encode(input_data, chunk_data, chunk_ident, block_values, block_count);
+		int max_sub = cpf->encode(input_data, chunk_data, chunk_ident, block_values, block_count);
 		const char *chunk_name = argv[3+i];
 		std::ofstream chunk_file(chunk_name, std::ios::binary | std::ios::trunc);
 		if (chunk_file.bad()) {
@@ -88,6 +88,7 @@ int main(int argc, char **argv)
 		chunk_file.write(reinterpret_cast<char *>(&crc32), 4);
 		chunk_file.write(reinterpret_cast<char *>(chunk_data), 2 * block_values);
 	}
+	delete cpf;
 	delete[] input_data;
 	delete[] chunk_data;
 	return 0;

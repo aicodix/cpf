@@ -89,10 +89,10 @@ int main(int argc, char **argv)
 		return 1;
 	}
 	uint16_t *output_data = new uint16_t[block_values];
-	CODE::CauchyPrimeFieldErasureCoding<PF, uint16_t, MAX_LEN> cpf;
+	auto cpf = new CODE::CauchyPrimeFieldErasureCoding<PF, uint16_t, MAX_LEN>();
 	static CODE::CRC<uint32_t> crc(0x8F6E37A0);
 	for (int i = 0, j = 0; i < block_count; ++i) {
-		cpf.decode(output_data, chunk_data, chunk_subst, chunk_ident, i, block_values, block_count);
+		cpf->decode(output_data, chunk_data, chunk_subst, chunk_ident, i, block_values, block_count);
 		int copy_bytes = 2 * block_values;
 		j += copy_bytes;
 		if (j > output_bytes)
@@ -101,6 +101,7 @@ int main(int argc, char **argv)
 		for (int k = 0; k < copy_bytes; ++k)
 			crc(reinterpret_cast<uint8_t *>(output_data)[k]);
 	}
+	delete cpf;
 	delete[] chunk_subst;
 	delete[] chunk_ident;
 	delete[] output_data;
