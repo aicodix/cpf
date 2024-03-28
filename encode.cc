@@ -58,21 +58,12 @@ int main(int argc, char **argv)
 	int block_values = (input_bytes + 2 * block_count - 1) / (2 * block_count);
 	int total_values = block_values * block_count;
 	uint16_t *input_data = new uint16_t[total_values];
+	input_file.read(reinterpret_cast<char *>(input_data), input_bytes);
 	static CODE::CRC<uint32_t> crc(0x8F6E37A0);
-	for (int i = 0; i < input_bytes / 2; ++i) {
-		uint16_t v;
-		input_file.read(reinterpret_cast<char *>(&v), 2);
-		crc(v);
-		input_data[i] = v;
-	}
-	if (input_bytes & 1) {
-		uint8_t v;
-		input_file.read(reinterpret_cast<char *>(&v), 1);
-		crc(v);
-		input_data[input_bytes/2] = v;
-	}
-	for (int i = (input_bytes + 1) / 2; i < total_values; ++i)
-		input_data[i] = 0;
+	for (int i = 0; i < input_bytes; ++i)
+		crc(reinterpret_cast<uint8_t *>(input_data)[i]);
+	for (int i = input_bytes; i < 2 * total_values; ++i)
+		reinterpret_cast<uint8_t *>(input_data)[i] = 0;
 	CODE::CauchyPrimeFieldErasureCoding<PF, uint16_t, MAX_LEN> cpf;
 	uint16_t *chunk_data = new uint16_t[block_values];
 	for (int i = 0; i < chunk_count; ++i) {
