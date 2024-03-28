@@ -86,8 +86,7 @@ int main(int argc, char **argv)
 		chunk_file.write(reinterpret_cast<char *>(&size), 3);
 		uint32_t crc32 = crc();
 		chunk_file.write(reinterpret_cast<char *>(&crc32), 4);
-		for (int j = 0; j < block_values; ++j)
-			chunk_file.write(reinterpret_cast<char *>(chunk_data + j), 2);
+		chunk_file.write(reinterpret_cast<char *>(chunk_data), 2 * block_values);
 	}
 	delete[] input_data;
 	delete[] chunk_data;
